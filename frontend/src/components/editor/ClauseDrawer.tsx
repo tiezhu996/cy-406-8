@@ -24,7 +24,7 @@ export function ClauseDrawer({ visible, clauses, onClose, onInsert }: ClauseDraw
   const filtered = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase();
     return clauses.filter((clause) => {
-      const categoryMatched = category !== 'all' && clause.category === category;
+      const categoryMatched = category === 'all' || clause.category === category;
       const keywordMatched =
         !normalizedKeyword ||
         clause.title.toLowerCase().includes(normalizedKeyword) ||

@@ -28,7 +28,7 @@ function upsertInstance(list: ContractInstance[], instance: ContractInstance) {
 
 function valuesFromTemplate(template: Template): VariableValues {
   return template.variables.reduce<VariableValues>((acc, variable) => {
-    acc[variable.name] = '';
+    acc[variable.name] = variable.defaultValue || '';
     return acc;
   }, {});
 }

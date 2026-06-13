@@ -105,7 +105,7 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
     return get().createTemplate({
       title: `${source.title} 副本`,
       category: source.category,
-      contentHtml: defaultDraft.contentHtml,
+      contentHtml: source.contentHtml,
       variables: source.variables.map((variable) => ({ ...variable, id: makeId('var') })),
       tags: [...source.tags, '副本']
     });
