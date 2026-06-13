@@ -23,6 +23,7 @@ export function InstanceEditor() {
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState(ContractStatus.Draft);
   const [remark, setRemark] = useState('');
+  const [saving, setSaving] = useState(false);
   const { instances, loading: instancesLoading, loadInstances, updateInstance } = useInstanceStore();
   const { templates, loading: templatesLoading, loadTemplates } = useTemplateStore();
   const { versions, loading: versionsLoading, loadVersions, saveVersion } = useVersionStore();
@@ -63,19 +64,23 @@ export function InstanceEditor() {
   };
 
   const saveSnapshot = async () => {
-    if (!isDataLoaded) {
-      Message.warning('数据加载中，请稍后再保存版本');
+    if (!isDataLoaded || saving) {
       return;
     }
-    const nextInstance = buildNextInstance();
-    await updateInstance(nextInstance);
-    const version = await saveVersion(nextInstance, remark);
-    await updateInstance({
-      ...nextInstance,
-      versionIds: Array.from(new Set([...nextInstance.versionIds, version.id]))
-    });
-    setRemark('');
-    Message.success(`已保存版本 ${version.versionNo}`);
+    setSaving(true);
+    try {
+      const nextInstance = buildNextInstance();
+      await updateInstance(nextInstance);
+      const version = await saveVersion(nextInstance, remark);
+      await updateInstance({
+        ...nextInstance,
+        versionIds: Array.from(new Set([...nextInstance.versionIds, version.id]))
+      });
+      setRemark('');
+      Message.success(`已保存版本 ${version.versionNo}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -92,7 +97,7 @@ export function InstanceEditor() {
           <Button icon={<IconSave />} onClick={() => void saveInstance()}>
             保存实例
           </Button>
-          <Button type="primary" onClick={() => void saveSnapshot()} disabled={!isDataLoaded}>
+          <Button type="primary" onClick={() => void saveSnapshot()} disabled={!isDataLoaded || saving} loading={saving}>
             保存版本
           </Button>
         </Space>
