@@ -23,9 +23,11 @@ export function InstanceEditor() {
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState(ContractStatus.Draft);
   const [remark, setRemark] = useState('');
-  const { instances, loadInstances, updateInstance } = useInstanceStore();
-  const { templates, loadTemplates } = useTemplateStore();
-  const { loadVersions, saveVersion } = useVersionStore();
+  const { instances, loading: instancesLoading, loadInstances, updateInstance } = useInstanceStore();
+  const { templates, loading: templatesLoading, loadTemplates } = useTemplateStore();
+  const { versions, loading: versionsLoading, loadVersions, saveVersion } = useVersionStore();
+
+  const isDataLoaded = !instancesLoading && !templatesLoading && !versionsLoading;
 
   useEffect(() => {
     void Promise.all([loadInstances(), loadTemplates(), loadVersions()]);
@@ -61,6 +63,10 @@ export function InstanceEditor() {
   };
 
   const saveSnapshot = async () => {
+    if (!isDataLoaded) {
+      Message.warning('数据加载中，请稍后再保存版本');
+      return;
+    }
     const nextInstance = buildNextInstance();
     await updateInstance(nextInstance);
     const version = await saveVersion(nextInstance, remark);
@@ -86,7 +92,7 @@ export function InstanceEditor() {
           <Button icon={<IconSave />} onClick={() => void saveInstance()}>
             保存实例
           </Button>
-          <Button type="primary" onClick={() => void saveSnapshot()}>
+          <Button type="primary" onClick={() => void saveSnapshot()} disabled={!isDataLoaded}>
             保存版本
           </Button>
         </Space>

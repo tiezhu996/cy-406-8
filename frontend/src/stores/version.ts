@@ -36,7 +36,8 @@ export const useVersionStore = create<VersionState>((set, get) => ({
   },
 
   async saveVersion(instance, remark) {
-    const related = get().versions.filter((version) => version.contractInstanceId === instance.id);
+    const allVersions = await versionDb.list();
+    const related = allVersions.filter((version) => version.contractInstanceId === instance.id);
     const nextNo = related.reduce((max, version) => Math.max(max, version.versionNo), 0) + 1;
     const version: Version = {
       id: makeId('ver'),
