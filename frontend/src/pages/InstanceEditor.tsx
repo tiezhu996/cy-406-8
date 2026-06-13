@@ -26,7 +26,7 @@ export function InstanceEditor() {
   const [saving, setSaving] = useState(false);
   const { instances, loading: instancesLoading, loadInstances, updateInstance } = useInstanceStore();
   const { templates, loading: templatesLoading, loadTemplates } = useTemplateStore();
-  const { versions, loading: versionsLoading, loadVersions, saveVersion } = useVersionStore();
+  const { versions, loading: versionsLoading, loadVersions, saveVersionAndUpdateInstance } = useVersionStore();
 
   const isDataLoaded = !instancesLoading && !templatesLoading && !versionsLoading;
 
@@ -70,12 +70,7 @@ export function InstanceEditor() {
     setSaving(true);
     try {
       const nextInstance = buildNextInstance();
-      await updateInstance(nextInstance);
-      const version = await saveVersion(nextInstance, remark);
-      await updateInstance({
-        ...nextInstance,
-        versionIds: Array.from(new Set([...nextInstance.versionIds, version.id]))
-      });
+      const { version } = await saveVersionAndUpdateInstance(nextInstance, remark);
       setRemark('');
       Message.success(`已保存版本 ${version.versionNo}`);
     } finally {
